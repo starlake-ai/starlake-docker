@@ -21,7 +21,7 @@ echo "Starting NFS services"
 rpc.nfsd
 echo "NFS services started"
 
-echo "Starting NFS mountd"
+echo "Starting NFS mountd (this may take some time)"
 rpc.mountd -F
 echo "NFS mountd started"
 

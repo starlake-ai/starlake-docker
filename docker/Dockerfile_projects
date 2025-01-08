@@ -4,6 +4,7 @@ RUN apk add --no-cache --no-progress \
     nfs-utils \
     postgresql-client \
     unzip \
+    curl \
     bash
 
 RUN mkdir -p /projects

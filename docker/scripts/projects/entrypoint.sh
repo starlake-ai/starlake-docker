@@ -2,6 +2,32 @@
 
 set -e
 
+
+# wait for API to be ready
+MAX_ATTEMPTS=10
+DELAY_BETWEEN_ATTEMPS=3
+
+attempt=1
+
+while true; do
+  test=$(curl -s -I "http://starlake-api:9000/api/v1/health" | head -n 1 | cut -b 10-12)
+  echo ">>>>> API ready ($attempt) ? <<<<<<"
+  if [ "$test" == 200 ]; then
+    echo ">>>>> API is ready <<<<<<"
+    break;
+  fi
+
+  sleep "$DELAY_BETWEEN_ATTEMPS"
+
+  attempt=$((attempt + 1))
+  if [ "$attempt" -gt "$MAX_ATTEMPTS" ]; then
+    exit 1
+  fi
+done
+
+
+
+# wait for filestore to be ready
 mkdir -p $FILESTORE_MNT_DIR
 mount -v -o nolock $FILESTORE_IP_ADDRESS:/$FILESTORE_SHARE_NAME $FILESTORE_MNT_DIR
 mount
@@ -53,6 +79,8 @@ EOSQL
             rm -rf /projects/$project_uuid
         fi
     done
+    echo "All projects have been unzipped"
+    echo "You can now access Starlake at http://localhost:${SL_UI_PORT:-80}"
 else
     exit 1
 fi

@@ -22,10 +22,12 @@ COPY scripts/docker/starlake.sh /app/starlake/starlake
 RUN chmod +x /app/starlake/starlake
 RUN ln -s /app/starlake/starlake /usr/local/bin/starlake
 
+
 # Switch back to the airflow user
 USER airflow
 
 # Install SL Python libraries
 RUN pip install --no-cache-dir \
     starlake-orchestration[airflow] --upgrade
+
 

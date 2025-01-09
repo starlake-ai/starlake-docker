@@ -44,8 +44,10 @@ services:
     container_name: starlake-dagster
     restart: on-failure
     depends_on:
-      - starlake-db
-      - starlake-nas
+      starlake-db:
+        condition: service_healthy
+      starlake-nas:
+        condition: service_started
     environment:
       DAGSTER_PG_USERNAME: ${SL_POSTGRES_USER:-dbuser}
       DAGSTER_PG_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
@@ -79,8 +81,6 @@ services:
       starlake-db:
         condition: service_healthy
       starlake-nas:
-        condition: service_started
-      starlake-dagster:
         condition: service_started
     healthcheck:
       test: [ "CMD", "curl", "-s", "-I", "http://starlake-api:9000/api/v1/health" ]

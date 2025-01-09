@@ -68,6 +68,8 @@ services:
         condition: service_started
       starlake-init-airflow-db:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-I", "http://starlake-airflow:8080/airflow/health"]
     environment:
       AIRFLOW__CORE__EXECUTOR: SequentialExecutor # SequentialExecutor is required to load files sequentially - to use LocalExecutor we have to fix the creation of audit tables concurrently while loading several tables in parallel for the first time
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${SL_POSTGRES_USER:-dbuser}:${SL_POSTGRES_PASSWORD:-dbuser123}@starlake-db:5432/${AIRFLOW_DB:-airflow}
@@ -102,7 +104,9 @@ services:
       starlake-nas:
         condition: service_started
       starlake-airflow:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-s", "-I", "http://starlake-api:9000/api/v1/health" ]
     privileged: true  # Required for mount permissions
     environment:
       - SL_HOME=/app/starlake
@@ -148,7 +152,7 @@ services:
     restart: on-failure
     depends_on:
       starlake-api:
-        condition: service_started
+        condition: service_healthy
     privileged: true  # Required for mount permissions
     ports:
       - ${SL_UI_PORT:-80}:80  # starlake-ui default port

@@ -62,9 +62,15 @@ INSERT INTO public.slk_project_props (id, project, properties, created, updated)
 OVERRIDING SYSTEM VALUE 
 VALUES($project_id, $project_id, '[{"envName":"__sl_ignore__"}]', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 EOSQL
+                        echo "Move project $member_id/$project_id to target folder"
                         mkdir -p $FILESTORE_MNT_DIR/$member_id/$project_id
                         cp -r $id/* $FILESTORE_MNT_DIR/$member_id/$project_id
                         rm -rf /projects/$project_uuid
+                        echo "Init git repository"
+                        git -C "$FILESTORE_MNT_DIR/$member_id/$project_id" init
+                        git -C "$FILESTORE_MNT_DIR/$member_id/$project_id" config user.email "admin@localhost.local"
+                        git -C "$FILESTORE_MNT_DIR/$member_id/$project_id" config user.name "admin@localhost.local"
+                        git -C "$FILESTORE_MNT_DIR/$member_id/$project_id" config pull.rebase false
                     else
                         echo "Project $project_id is already present in $FILESTORE_MNT_DIR/$member_id/"
                         rm -rf /projects/$project_uuid

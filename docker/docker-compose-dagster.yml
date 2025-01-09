@@ -107,6 +107,8 @@ services:
       - SL_API_MAIL_USER=${SL_API_MAIL_USER:-apikey}
       - SL_API_MAIL_PASSWORD=${SL_API_MAIL_PASSWORD}
       - SL_API_MAIL_FROM=${SL_API_MAIL_FROM:-contact@starlake.ai}
+      - SL_API_AIRFLOW_PRIVATE_URL=
+      - SL_API_ORCHESTRATOR_URL=http://localhost:3000/dagster
 
   starlake-ui:
     image: starlakeai/starlake-1.3-ui:${SL_UI_VERSION:-0.1}

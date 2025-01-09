@@ -19,10 +19,16 @@ git clone https://github.com/starlake-ai/starlake-docker.git
 cd starlake-docker
 ```
 
-3. Run the following command to start Starlake UI
+3. Run the following command to start Starlake UI with Airflow on Docker
 ```bash
 docker-compose up
 ```
+
+to run Starlake UI with Dagster on Docker, run the following command
+```bash
+docker-compose -f docker-compose-dagster.yml up
+```
+
 
 To run on a different port, you can specify the port using the `SL_UI_PORT` environment variable. For example, to run on port 8080, run the following command
 ```bash  
@@ -33,8 +39,14 @@ SL_UI_PORT=8080 docker-compose up
 
 That's it! You have successfully started Starlake UI on Docker.
 
+
 ## Stopping Starlake UI
 To stop Starlake UI, run the following command in the same directory
 ```bash
 docker-compose down
 ```
+
+
+
+
+

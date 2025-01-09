@@ -21,12 +21,12 @@ cd starlake-docker
 
 3. Run the following command to start Starlake UI with Airflow on Docker
 ```bash
-docker-compose up
+docker compose up
 ```
 
 to run Starlake UI with Dagster on Docker, run the following command
 ```bash
-docker-compose -f docker-compose-dagster.yml up
+docker compose -f docker-compose-dagster.yml up
 ```
 
 
@@ -43,7 +43,7 @@ That's it! You have successfully started Starlake UI on Docker.
 ## Stopping Starlake UI
 To stop Starlake UI, run the following command in the same directory
 ```bash
-docker-compose down
+docker compose down
 ```
 
 

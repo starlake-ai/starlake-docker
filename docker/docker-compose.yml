@@ -70,8 +70,8 @@ services:
       starlake-init-airflow-db:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "curl", "-s", "-I", "http://starlake-airflow:8080/airflow/health"]
-      interval: "5s"
+      test: bash -c "[ -f /opt/airflow/airflow-webserver.pid ]"
+      interval: "2s"
       retries: 60
     environment:
       AIRFLOW__CORE__EXECUTOR: SequentialExecutor # SequentialExecutor is required to load files sequentially - to use LocalExecutor we have to fix the creation of audit tables concurrently while loading several tables in parallel for the first time
@@ -111,7 +111,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-s", "-I", "http://starlake-api:9000/api/v1/health" ]
-      interval: "5s"
+      interval: "2s"
       retries: 60
     privileged: true  # Required for mount permissions
     environment:

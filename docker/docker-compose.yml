@@ -23,6 +23,7 @@ services:
       POSTGRES_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
       POSTGRES_DB: ${SL_POSTGRES_DB:-starlake}
       AIRFLOW_DB: ${AIRFLOW_DB:-airflow}
+      DAGSTER_DB: ${DAGSTER_DB:-dagster}
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
     healthcheck:
       test: ["CMD", "pg_isready", "-q", "-U", "${SL_POSTGRES_USER:-dbuser}", "-d", "${SL_POSTGRES_DB:-starlake}"]
@@ -31,6 +32,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./conf/hydra/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./scripts/airflow/init-database.sh:/docker-entrypoint-initdb.d/init-airflow-database.sh
+      - ./scripts/dagster/init-database.sh:/docker-entrypoint-initdb.d/init-dagster-database.sh
 
   starlake-init-airflow-db:
     image: starlakeai/starlake-airflow:latest

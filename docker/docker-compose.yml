@@ -9,8 +9,14 @@ services:
     container_name: starlake-nas
     restart: on-failure
     privileged: true  # Required to access /proc/fs/nfsd
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: "1s"
     volumes:
       - projects_data:/projects
+      - external_projects_data:/external_projects
+      # use local mount if you want such as
+      # - starlake-prj-nfs-mount:/external_projects
 
   starlake-db:
     image: ghcr.io/hydradatabase/hydra:latest
@@ -68,7 +74,7 @@ services:
       starlake-db:
         condition: service_healthy
       starlake-nas:
-        condition: service_started
+        condition: service_healthy
       starlake-init-airflow-db:
         condition: service_completed_successfully
     healthcheck:
@@ -90,8 +96,10 @@ services:
       sleep 10 &&
       pip install --no-cache-dir starlake-orchestration[airflow] --upgrade  --force-reinstall &&
       sudo mkdir -p /mnt/filestore/projects &&
+      sudo mkdir -p /mnt/filestore/external_projects &&
       sudo mount -v -o nolock starlake-nas:/projects /mnt/filestore/projects &&
       sudo mount -v -o nolock starlake-nas:/projects/dags /opt/airflow/dags &&
+      sudo mount -v -o nolock starlake-nas:/external_projects /mnt/filestore/external_projects &&
       airflow scheduler &
       exec airflow webserver"
     volumes:
@@ -108,7 +116,7 @@ services:
       starlake-db:
         condition: service_healthy
       starlake-nas:
-        condition: service_started
+        condition: service_healthy
       starlake-airflow:
         condition: service_healthy
     healthcheck:
@@ -141,6 +149,7 @@ services:
       - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
       - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS
       - FILESTORE_MNT_DIR=/mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
+      - FILESTORE_EXTERNAL_PROJECTS_SHARE_NAME=external_projects
       - POSTGRES_HOST=starlake-db
       - POSTGRES_DB=${SL_POSTGRES_DB:-starlake}
       - POSTGRES_USER=${SL_POSTGRES_USER:-dbuser}
@@ -201,3 +210,10 @@ volumes:
   projects_data:
   pgdata:
   airflow_logs:
+  external_projects_data:
+  # starlake-prj-nfs-mount:
+  #   driver: local
+  #   driver_opts:
+  #     type: nfs
+  #     o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+  #     device: ":/path/to/starlake/project/container"

@@ -39,6 +39,39 @@ SL_UI_PORT=8080 docker-compose up
 
 That's it! You have successfully started Starlake UI on Docker.
 
+## Mounting external projects
+
+If you have any starlake container projects and want to mount it:
+- run `setup_mac_nfs.sh` if you are on mac in order to expose your folder via NFS.
+  Modify the root folder to share if necessary. By default it is set to /user.
+  This change is not specific to starlake and may be used in other container.
+- comment `- external_projects_data:/external_projects`
+- uncomment `- starlake-prj-nfs-mount:/external_projects`
+- go to the end of the file and modify the path of the volume to point to the starlake container folder
+
+Starlake container folder should contains starlake project folder:
+
+```
+ my_container_to_mount
+   |
+    - sl_project_1
+        |
+         - metadata
+         - ...
+   |
+    - sl_project_2
+        |
+         - metadata
+         - ...
+```
+
+If you have many container projects, create as many volume as the number of container projects.
+
+### Limit
+
+- Currently, we can not mount starlake project directly under the mounted `/external_projects`. Subfolders of the mounted external project can't be accessed correctly.
+- This feature has been tested only on mac at the moment
+
 
 ## Stopping Starlake UI
 To stop Starlake UI, run the following command in the same directory

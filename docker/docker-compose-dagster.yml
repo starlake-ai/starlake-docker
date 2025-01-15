@@ -59,8 +59,10 @@ services:
       sleep 10 &&
       pip install --no-cache-dir starlake-orchestration[dagster] --upgrade  --force-reinstall &&
       mkdir -p /mnt/filestore/projects &&
+      mkdir -p /mnt/filestore/external_projects &&
       mount -v -o nolock starlake-nas:/projects /mnt/filestore/projects &&
       mount -v -o nolock starlake-nas:/projects/dags /opt/dagster/app/dags &&
+      mount -v -o nolock starlake-nas:/external_projects /mnt/filestore/external_projects &&
       python3 dagster_code_locations.py &&
       service cron --full-restart &
       exec dagster-webserver -h 0.0.0.0 -p 3000 --path-prefix /dagster"
@@ -111,6 +113,7 @@ services:
       - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
       - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS
       - FILESTORE_MNT_DIR=/mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
+      - FILESTORE_EXTERNAL_PROJECTS_SHARE_NAME=external_projects
       - POSTGRES_HOST=starlake-db
       - POSTGRES_DB=${SL_POSTGRES_DB:-starlake}
       - POSTGRES_USER=${SL_POSTGRES_USER:-dbuser}
@@ -166,6 +169,7 @@ services:
       - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
       - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS
       - FILESTORE_MNT_DIR=/mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
+      - FILESTORE_EXTERNAL_PROJECTS_SHARE_NAME=external_projects
     volumes:
       - .env.dagster.docker:/app/.env:ro
 

@@ -1,25 +1,27 @@
-# Utiliser une image de base légère
+# Use a lightweight base image
 FROM alpine:latest
 
-# Installer le serveur NFS
+# Install necessary packages
 RUN apk add --no-cache nfs-utils
 
-# Créer les répertoires à partager
-RUN mkdir -p /projects /projects/dags
+# Create shared and mounted directories
+RUN mkdir -p /projects /projects/dags /external_projects
 
-# Accorder les permissions nécessaires
-RUN chmod 777 /projects /projects/dags
+# Grant necessary permissions
+RUN chmod 777 /projects /projects/dags /external_projects
 
-# Configurer les exports NFS
+# Configure NFS exports
 RUN echo "/projects *(rw,sync,no_subtree_check,no_root_squash,insecure)" > /etc/exports && \
-    echo "/projects/dags *(rw,sync,no_subtree_check,no_root_squash,insecure)" >> /etc/exports
+    echo "/projects/dags *(rw,sync,no_subtree_check,no_root_squash,insecure)" >> /etc/exports && \
+    echo "/external_projects *(rw,sync,no_subtree_check,no_root_squash,insecure,fsid=999)" >> /etc/exports
 
-# Script de démarrage pour les services NFS
+# Copy the NFS startup script
 COPY scripts/nfs/start.sh /start-nfs.sh
-RUN chmod +x /start-nfs.sh
+COPY scripts/nfs/healthcheck.sh /healthcheck.sh
+RUN chmod +x /start-nfs.sh /healthcheck.sh
 
-# Exposer le port NFS
+# Expose the NFS port
 EXPOSE 2049
 
-# Commande pour démarrer le serveur NFS
+# Command to start NFS
 CMD ["/start-nfs.sh"]

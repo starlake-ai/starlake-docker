@@ -49,7 +49,7 @@ If you have any starlake container projects and want to mount it:
 - uncomment `- starlake-prj-nfs-mount:/external_projects`
 - go to the end of the file and modify the path of the volume to point to the starlake container folder
 
-Starlake container folder should contains starlake project folder:
+Starlake container folder should contain the starlake project folder:
 
 ```
  my_container_to_mount
@@ -65,11 +65,11 @@ Starlake container folder should contains starlake project folder:
          - ...
 ```
 
-If you have many container projects, create as many volume as the number of container projects.
+If you have many container projects, create as many volume as needed.
 
 ### Limit
 
-- Currently, we can not mount starlake project directly under the mounted `/external_projects`. Subfolders of the mounted external project can't be accessed correctly.
+- Currently, we cannot mount the starlake projects directory directly under the mounted `/external_projects`. Subfolders of the mounted external project can't be accessed correctly.
 - This feature has been tested only on mac at the moment
 
 

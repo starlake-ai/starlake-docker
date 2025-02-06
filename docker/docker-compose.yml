@@ -19,7 +19,7 @@ services:
       # - starlake-prj-nfs-mount:/external_projects
 
   starlake-db:
-    image: postgres:17.2
+    image: postgres:17
     restart: on-failure
     container_name: starlake-db
     ports:

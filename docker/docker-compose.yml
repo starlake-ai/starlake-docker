@@ -161,6 +161,7 @@ services:
       - SL_API_MAIL_PASSWORD=${SL_API_MAIL_PASSWORD:-}
       - SL_API_MAIL_FROM=${SL_API_MAIL_FROM:-contact@starlake.ai}
       - SL_API_MAX_USER_SPACE_MB=${SL_API_MAX_USER_SPACE_MB:-0}
+      - _JAVA_OPTIONS=-XX:UseSVE=0
 
   starlake-projects:
     image: starlakeai/starlake-projects:latest

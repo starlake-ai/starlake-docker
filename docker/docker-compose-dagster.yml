@@ -15,7 +15,7 @@ services:
       - projects_data:/projects
 
   starlake-db:
-    image: ghcr.io/hydradatabase/hydra:latest
+    image: postgres:17
     restart: on-failure
     container_name: starlake-db
     ports:
@@ -32,7 +32,7 @@ services:
       interval: "1s"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./conf/hydra/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./conf/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./scripts/airflow/init-database.sh:/docker-entrypoint-initdb.d/init-airflow-database.sh
       - ./scripts/dagster/init-database.sh:/docker-entrypoint-initdb.d/init-dagster-database.sh
 

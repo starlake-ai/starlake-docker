@@ -8,6 +8,8 @@ USER root
 RUN apt-get update \
     && apt-get install -y nfs-common \
     docker.io \
+    mandoc \
+    less \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,11 +25,33 @@ RUN chmod +x /app/starlake/starlake
 RUN ln -s /app/starlake/starlake /usr/local/bin/starlake
 
 
+# Install gcloud sdk
+# RUN curl -sSL https://sdk.cloud.google.com | bash
+RUN curl https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > /tmp/google-cloud-sdk.tar.gz \
+  && mkdir -p /usr/local/gcloud \
+  && tar -C /usr/local/gcloud -xvf /tmp/google-cloud-sdk.tar.gz \
+  && ln -s /usr/local/gcloud/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud \
+  && rm /tmp/google-cloud-sdk.tar.gz
+
 # Switch back to the airflow user
 USER airflow
 
+# Install aws cli
+RUN pip install --no-cache-dir -U awscli
+
+# Configure aws cli
+RUN mkdir -p /home/airflow/.aws
+COPY conf/aws/credentials /home/airflow/.aws/credentials
+COPY conf/aws/config /home/airflow/.aws/config
+
+# Install airflow amazon and google providers
+RUN pip install --no-cache-dir \
+    apache-airflow-providers-amazon \
+    apache-airflow-providers-google --upgrade
+
 # Install SL Python libraries
 RUN pip install --no-cache-dir \
+    -i https://test.pypi.org/simple/ \
     starlake-orchestration[airflow] --upgrade
 
 

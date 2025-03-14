@@ -13,6 +13,7 @@ services:
     privileged: true  # Required to access /proc/fs/nfsd
     volumes:
       - projects_data:/projects
+      - external_projects_data:/external_projects
 
   starlake-db:
     image: postgres:17
@@ -57,7 +58,7 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      pip install --no-cache-dir starlake-orchestration[dagster] --upgrade  --force-reinstall &&
+      pip install --no-cache-dir starlake-orchestration[dagster] --upgrade &&
       mkdir -p /mnt/filestore/projects &&
       mkdir -p /mnt/filestore/external_projects &&
       mount -v -o nolock starlake-nas:/projects /mnt/filestore/projects &&
@@ -127,6 +128,11 @@ services:
       - SL_API_AIRFLOW_PRIVATE_URL=
       - SL_API_ORCHESTRATOR_URL=http://localhost:3000/dagster
       - SL_API_MAX_USER_SPACE_MB=${SL_API_MAX_USER_SPACE_MB:-0}
+    entrypoint: >
+      /bin/bash -c "
+      sleep 10 &&
+      pip install --no-cache-dir starlake-orchestration[dagster] --upgrade  &&
+      /usr/bin/tini -- /app/run-api.sh"
 
   starlake-projects:
     image: starlakeai/starlake-projects:latest
@@ -178,3 +184,4 @@ volumes:
   pgdata:
   dagster_logs:
   dagster_storage:
+  external_projects_data:

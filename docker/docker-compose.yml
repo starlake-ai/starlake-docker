@@ -165,7 +165,7 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      python3 -m pip install --no-cache-dir starlake-orchestration[airflow] --upgrade &&
+      python3 -m pip install--break-system-packages --no-cache-dir starlake-orchestration[airflow] --upgrade &&
       /usr/bin/tini -- /app/run-api.sh"
 
   starlake-projects:

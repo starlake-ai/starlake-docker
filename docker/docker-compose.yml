@@ -88,7 +88,7 @@ services:
       INSTALL_MYSQL_CLIENT: 'false'
       INSTALL_MSSQL_CLIENT: 'false'
       SL_HOME: /app/starlake
-      AIRFLOW__WEBSERVER__BASE_URL: http://starlake-airflow:8080/airflow
+      AIRFLOW__WEBSERVER__BASE_URL: http://localhost${SL_PORT:-80}/airflow
       AIRFLOW__CORE__LOGGING_LEVEL: WARN
       AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 30
     entrypoint: >
@@ -204,3 +204,5 @@ volumes:
   #     type: nfs
   #     o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
   #     device: ":/path/to/starlake/project/container"
+
+

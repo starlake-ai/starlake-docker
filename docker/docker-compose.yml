@@ -169,7 +169,7 @@ services:
       - SL_API_UI_FOLDER=/app/ui
 
   starlake-proxy:
-      image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.4}-proxy:${SL_IMAGE_VERSION:-0.1}
+      image: starlakeai/starlake-proxy:${SL_IMAGE_VERSION:-0.1}
       pull_policy: always
       container_name: starlake-proxy
       restart: on-failure

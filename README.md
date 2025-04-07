@@ -30,9 +30,9 @@ docker compose -f docker-compose-dagster.yml up
 ```
 
 
-To run on a different port, set the `SL_UI_PORT` environment variable. For example, to run on port 8080, run the following command
+To run on a different port, set the `SL_PORT` environment variable. For example, to run on port 8080, run the following command
 ```bash
-SL_UI_PORT=8080 docker-compose up
+SL_PORT=8080 docker-compose up
 ```
 
 4. Open your browser and navigate to `http://localhost` or if you chose a different port `http://localhost:$SL_UI_PORT` to access Starlake UI

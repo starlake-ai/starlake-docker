@@ -28,4 +28,4 @@ for env in $envs; do
     docker_envs+=("-e $env")
 done
 
-docker exec ${docker_envs[*]} starlake-api /app/starlake/starlake.sh $command ${arguments[*]}
+docker exec ${docker_envs[*]} starlake-ui /app/starlake/starlake.sh $command ${arguments[*]}

@@ -147,6 +147,8 @@ services:
       starlake-api:
         condition: service_healthy
     privileged: true  # Required for mount permissions
+    ports:
+      - ${SL_UI_PORT:-9000}:9000  # starlake-ui default port
     environment:
       POSTGRES_USER: ${SL_POSTGRES_USER:-dbuser}
       POSTGRES_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}

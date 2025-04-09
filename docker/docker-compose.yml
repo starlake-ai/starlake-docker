@@ -195,7 +195,7 @@ services:
       FILESTORE_IP_ADDRESS: starlake-nas  # Environment variable to specify the IP address of the NAS
       FILESTORE_MNT_DIR: /mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
     volumes:
-      - ./projects:/projects
+      - ./projects/airflow:/projects
 
   starlake-proxy:
       image: starlakeai/starlake-proxy:${SL_IMAGE_VERSION:-0.1}

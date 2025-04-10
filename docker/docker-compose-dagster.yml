@@ -143,6 +143,8 @@ services:
       sleep 10 &&
       python3 -m pip install --break-system-packages --no-cache-dir starlake-dagster --upgrade &&
       /usr/bin/tini -- /app/run-api.sh"
+    volumes:
+      - ./scripts/starlake:/usr/local/bin/starlake:ro
 
   starlake-projects:
     image: starlakeai/starlake-projects:latest

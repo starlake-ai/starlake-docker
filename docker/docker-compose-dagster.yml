@@ -53,7 +53,7 @@ services:
       starlake-db:
         condition: service_healthy
       starlake-nas:
-        condition: service_started
+        condition: service_healthy
     environment:
       DAGSTER_PG_USERNAME: ${SL_POSTGRES_USER:-dbuser}
       DAGSTER_PG_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
@@ -91,7 +91,7 @@ services:
       starlake-nas:
         condition: service_healthy
       starlake-dagster:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: [ "CMD", "curl", "-s", "-I", "http://starlake-ui:9000/api/v1/health" ]
       interval: "5s"
@@ -181,7 +181,7 @@ services:
         starlake-nas:
           condition: service_healthy
         starlake-dagster:
-          condition: service_healthy
+          condition: service_started
         starlake-ui:
           condition: service_healthy
       healthcheck:

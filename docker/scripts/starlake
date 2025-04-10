@@ -23,9 +23,11 @@ done
 
 envs=$(echo $options | tr "," "\n")
 
-docker_envs=()
+export JAVA_HOME=/opt/java/openjdk
+export PATH=$JAVA_HOME/bin:$PATH
+
 for env in $envs; do
-    docker_envs+=("-e $env")
+    export $env
 done
 
-docker exec ${docker_envs[*]} starlake-ui /app/starlake/starlake.sh $command ${arguments[*]}
+/app/starlake/starlake.sh $command ${arguments[*]}

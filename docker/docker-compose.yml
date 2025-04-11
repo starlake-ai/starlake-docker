@@ -167,6 +167,8 @@ services:
       - SL_API_MAX_USER_SPACE_MB=${SL_API_MAX_USER_SPACE_MB:-0}
       - _JAVA_OPTIONS=-XX:UseSVE=0
       - SL_API_UI_FOLDER=/app/ui
+      - LOAD_DAG_REF=airflow_load_shell
+      - TRANSFORM_DAG_REF=airflow_transform_shell
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
@@ -199,7 +201,7 @@ services:
       FILESTORE_IP_ADDRESS: starlake-nas  # Environment variable to specify the IP address of the NAS
       FILESTORE_MNT_DIR: /mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
     volumes:
-      - ./projects/airflow:/projects
+      - ./projects:/projects
 
   starlake-proxy:
       image: starlakeai/starlake-proxy:${SL_IMAGE_VERSION:-0.1}

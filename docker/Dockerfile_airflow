@@ -52,6 +52,6 @@ RUN pip install --no-cache-dir \
 # Install SL Python libraries
 RUN pip install --no-cache-dir \
     -i https://test.pypi.org/simple/ \
-    starlake-orchestration[airflow] --upgrade
+    starlake-airflow~=0.2
 
 

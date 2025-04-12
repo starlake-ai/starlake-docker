@@ -94,7 +94,7 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      pip install --no-cache-dir starlake-orchestration[airflow] --upgrade &&
+      pip install --no-cache-dir starlake-airflow --upgrade --force-reinstall &&
       sudo mkdir -p /mnt/filestore/projects &&
       sudo mkdir -p /mnt/filestore/external_projects &&
       sudo mount -v -o nolock starlake-nas:/projects /mnt/filestore/projects &&
@@ -172,7 +172,7 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow --upgrade &&
+      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow --upgrade --force-reinstall &&
       airflow db init &&
       airflow db migrate &&
       /usr/bin/tini -- /app/run-api.sh"

@@ -103,7 +103,7 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      python3 -m pip install --break-system-packages --no-cache-dir starlake-snowflake --upgrade &&
+      python3 -m pip install --break-system-packages --no-cache-dir starlake-snowflake --upgrade --force-reinstall &&
       /usr/bin/tini -- /app/run-api.sh"
 
   starlake-projects:

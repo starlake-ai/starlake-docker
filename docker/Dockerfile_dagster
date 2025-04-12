@@ -50,7 +50,7 @@ RUN ln -s /app/starlake/starlake /usr/local/bin/starlake
 
 # Install SL Python libraries
 RUN pip install --no-cache-dir \
-    starlake-orchestration[dagster] --upgrade
+    starlake-dagster~=0.2
 
 RUN mkdir -p /opt/dagster/app/dags
 

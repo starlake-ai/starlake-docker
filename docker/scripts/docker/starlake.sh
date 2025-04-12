@@ -31,8 +31,5 @@ if [ -n "$options" ]; then
     IFS="$old_ifs"
 fi
 
-# Run the docker command and capture the return code
-return_code=0
-docker exec -i "${docker_envs[@]}" starlake-ui /app/starlake/starlake.sh "$command" "${arguments[@]}" 2>&1  || return_code=$?
-
-echo $return_code
+# Run the docker command
+docker exec -i "${docker_envs[@]}" starlake-ui /app/starlake/starlake.sh "$command" "${arguments[@]}"

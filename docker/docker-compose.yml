@@ -89,7 +89,7 @@ services:
       INSTALL_MSSQL_CLIENT: 'false'
       SL_HOME: /app/starlake
       AIRFLOW__WEBSERVER__BASE_URL: http://localhost${SL_PORT:-80}/airflow
-      AIRFLOW__CORE__LOGGING_LEVEL: WARN
+      AIRFLOW__CORE__LOGGING_LEVEL: INFO
       AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 30
     entrypoint: >
       /bin/bash -c "

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Exit immediately if a command exits with a non-zero status
-set -eo pipefail
+old_ifs="$IFS"
 
 # Check if at least one argument is passed
 if [ "$#" -eq 0 ]; then
@@ -9,6 +8,7 @@ if [ "$#" -eq 0 ]; then
   exit 1
 fi
 
+# Parse command and options
 options=""
 command="$1"
 shift
@@ -16,16 +16,23 @@ shift
 arguments=()
 while [ $# -gt 0 ]; do
     case "$1" in
-        -o | --options)   options="$2"; shift; shift;;
-        *) arguments+=("$1");shift;;
+        -o|--options) options="$2"; shift 2 ;;
+        *) arguments+=("$1"); shift ;;
     esac
 done
 
-envs=$(echo $options | tr "," "\n")
-
+# Convert options to Docker -e arguments
 docker_envs=()
-for env in $envs; do
-    docker_envs+=("-e $env")
-done
+if [ -n "$options" ]; then
+    IFS=',' read -ra env_array <<< "$options"
+    for env in "${env_array[@]}"; do
+        docker_envs+=("-e" "$env")
+    done
+    IFS="$old_ifs"
+fi
 
-docker exec ${docker_envs[*]} starlake-ui /app/starlake/starlake.sh $command ${arguments[*]}
+# Run the docker command and capture the return code
+return_code=0
+docker exec -i "${docker_envs[@]}" starlake-ui /app/starlake/starlake.sh "$command" "${arguments[@]}" 2>&1  || return_code=$?
+
+echo $return_code

@@ -39,6 +39,10 @@ SL_PORT=8080 docker-compose up
 
 That's it! You have successfully started Starlake UI on Docker.
 
+> **Note**
+> Whenever you update using git pull, run docker-compose with the __--build__ flag:
+> ``` docker compose up --build ```
+
 ## Mounting external projects
 
 If you have any starlake container projects and want to mount it:

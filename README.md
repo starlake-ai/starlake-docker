@@ -35,7 +35,7 @@ To run on a different port, set the `SL_PORT` environment variable. For example,
 SL_PORT=8080 docker-compose up
 ```
 
-4. Open your browser and navigate to `http://localhost` or if you chose a different port `http://localhost:$SL_UI_PORT` to access Starlake UI
+4. Open your browser and navigate to `http://localhost` or if you chose a different port `http://localhost:$SL_PORT` to access Starlake UI
 
 That's it! You have successfully started Starlake UI on Docker.
 

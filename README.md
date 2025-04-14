@@ -29,6 +29,11 @@ to run Starlake UI with Dagster on Docker, run the following command
 docker compose -f docker-compose-dagster.yml up
 ```
 
+to run Starlake UI with Snowflake orchestrator, run the following command
+```bash
+docker compose -f docker-compose-snowflake.yml up
+```
+
 
 To run on a different port, set the `SL_PORT` environment variable. For example, to run on port 8080, run the following command
 ```bash

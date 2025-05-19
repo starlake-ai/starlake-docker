@@ -1,5 +1,5 @@
 # Use the official Apache Airflow image as the base
-FROM apache/airflow:latest
+FROM apache/airflow:2.10.5
 
 # Switch to root user to install additional packages
 USER root
@@ -51,7 +51,6 @@ RUN pip install --no-cache-dir \
 
 # Install SL Python libraries
 RUN pip install --no-cache-dir \
-    -i https://test.pypi.org/simple/ \
-    starlake-airflow~=0.2
+    starlake-airflow~=0.3
 
 

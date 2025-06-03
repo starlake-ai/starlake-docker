@@ -96,14 +96,13 @@ services:
       - SL_API_MAIL_PASSWORD=${SL_API_MAIL_PASSWORD:-}
       - SL_API_MAIL_FROM=${SL_API_MAIL_FROM:-contact@starlake.ai}
       - SL_API_MAX_USER_SPACE_MB=${SL_API_MAX_USER_SPACE_MB:-0}
-      - _JAVA_OPTIONS=-XX:UseSVE=0
       - SL_API_UI_FOLDER=/app/ui
       - LOAD_DAG_REF=snowflake_load_sql
       - TRANSFORM_DAG_REF=snowflake_transform_sql
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      python3 -m pip install --break-system-packages --no-cache-dir starlake-snowflake --upgrade --force-reinstall &&
+      python3 -m pip install --break-system-packages --no-cache-dir starlake-snowflake --upgrade &&
       /usr/bin/tini -- /app/run-api.sh"
 
   starlake-projects:

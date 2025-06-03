@@ -21,17 +21,17 @@ cd starlake-docker/docker
 
 3. Run the following command to start Starlake UI with Airflow on Docker
 ```bash
-docker compose up
+./start.sh
 ```
 
 to run Starlake UI with Dagster on Docker, run the following command
 ```bash
-docker compose -f docker-compose-dagster.yml up
+./start.sh -o dagster
 ```
 
 to run Starlake UI with Snowflake orchestrator, run the following command
 ```bash
-docker compose -f docker-compose-snowflake.yml up
+./start.sh -o snowflake
 ```
 
 

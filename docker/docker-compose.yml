@@ -110,7 +110,7 @@ services:
     privileged: true  # Required for mounting NFS
 
   starlake-ui:
-    image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.4}-ui:${SL_IMAGE_VERSION:-0.1}
+    image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.5}-ui:${SL_IMAGE_VERSION:-0.1}
     pull_policy: always
     container_name: starlake-ui
     restart: on-failure

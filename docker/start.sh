@@ -74,17 +74,5 @@ else
     DOCKER_COMPOSE_FILE="docker-compose.yml"
 fi
 
-# Delete the old .env file
-rm -f .env.dynamic
-
-# Add basic variables
-cat <<EOF >> .env.dynamic
-EOF
-
-# Add _JAVA_OPTIONS only for aarch64 or arm64
-if [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
-  echo "_JAVA_OPTIONS=-XX:UseSVE=0" >> .env.dynamic
-fi
-
 # Run docker-compose specifying the environment file
-docker-compose --env-file .env.dynamic -f ${DOCKER_COMPOSE_FILE} up
+docker-compose -f ${DOCKER_COMPOSE_FILE} up

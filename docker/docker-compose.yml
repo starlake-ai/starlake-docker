@@ -172,7 +172,7 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow --upgrade --force-reinstall &&
+      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow --upgrade &&
       airflow db init &&
       airflow db migrate &&
       /usr/bin/tini -- /app/run-api.sh"

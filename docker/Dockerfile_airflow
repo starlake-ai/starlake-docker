@@ -47,7 +47,7 @@ COPY conf/aws/config /home/airflow/.aws/config
 # Install airflow amazon and google providers
 RUN pip install --no-cache-dir \
     apache-airflow-providers-amazon \
-    apache-airflow-providers-google --upgrade
+    apache-airflow-providers-google
 
 # Install SL Python libraries
 RUN pip install --no-cache-dir \

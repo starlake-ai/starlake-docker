@@ -63,7 +63,7 @@ If you have any starlake container projects and want to mount it:
 Starlake container folder should contain the starlake project folder:
 
 ```
- /path/to/starlake/project/container
+ /path_to_starlake_project_container
    |
     - sl_project_1
         |

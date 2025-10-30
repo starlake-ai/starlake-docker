@@ -65,12 +65,12 @@ Starlake container folder should contain the starlake project folder:
 ```
  /path_to_starlake_project_container
    |
-    - sl_project_1
+    - my_first_starlake_project
         |
          - metadata
          - ...
    |
-    - sl_project_2
+    - my_second_starlake_project
         |
          - metadata
          - ...

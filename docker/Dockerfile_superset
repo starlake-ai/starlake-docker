@@ -1,0 +1,16 @@
+# Start from the official Superset image
+FROM starlakeai/superset-duckdb:4.1.4
+
+# Switch to root user to perform system-level installs if needed,
+# though pip install is usually fine as the superset user.
+USER root
+
+# Install the DuckDB Python driver and the SQLAlchemy engine
+# Use the --no-cache-dir flag to keep the image small
+RUN pip install --no-cache-dir duckdb duckdb-engine
+
+# Switch back to the non-root 'superset' user for security
+USER superset
+
+
+

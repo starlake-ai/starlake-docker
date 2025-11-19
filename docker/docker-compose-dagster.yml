@@ -15,10 +15,8 @@ services:
       test: ["CMD", "/healthcheck.sh"]
       interval: "1s"
     volumes:
-      - projects_data:/projects
-      - external_projects_data:/external_projects
-      # use local mount if you want such as
-      # - starlake-prj-nfs-mount:/external_projects
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
+      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
 
   starlake-db:
     image: postgres:17
@@ -198,14 +196,6 @@ services:
         - SL_PORT=${SL_PORT:-80}
 
 volumes:
-  projects_data:
   pgdata:
   dagster_logs:
   dagster_storage:
-  external_projects_data:
-  # starlake-prj-nfs-mount:
-  #   driver: local
-  #   driver_opts:
-  #     type: nfs
-  #     o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-  #     device: ":/path/to/starlake/project/container"

@@ -1,6 +1,14 @@
 #!/bin/sh
 set -e
 
+mkdir -p /projects/dags /external_projects
+chmod -R 777 /projects /external_projects
+cat > /etc/exports <<EOF
+/projects *(rw,sync,no_subtree_check,no_root_squash,insecure,fsid=0)
+/projects/dags *(rw,sync,no_subtree_check,no_root_squash,insecure,fsid=1)
+/external_projects *(rw,sync,no_subtree_check,no_root_squash,insecure,fsid=999)
+EOF
+
 # Démarrer rpcbind
 echo "Starting rpcbind"
 rpcbind

@@ -13,9 +13,8 @@ services:
       test: ["CMD", "/healthcheck.sh"]
       interval: "1s"
     volumes:
-      # use local mount if you want such as
-      - projects_data:/projects
-      - external_projects_data:/external_projects
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
+      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
 
   starlake-db:
     image: postgres:17
@@ -270,10 +269,8 @@ services:
 
 
 volumes:
-  projects_data:
   pgdata:
   airflow_logs:
-  external_projects_data:
   # starlake-prj-nfs-mount:
   #   driver: local
   #   driver_opts:

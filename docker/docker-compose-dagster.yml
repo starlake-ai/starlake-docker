@@ -119,7 +119,6 @@ services:
       - SL_API_DOMAIN=${SL_API_DOMAIN:-localhost}
       - SL_API_PROJECT_ROOT=/mnt/filestore/projects
       - SL_API_ORCHESTRATOR_PRIVATE_URL=http://starlake-dagster:3000/dagster/
-      - SL_API_AIRFLOW_PRIVATE_URL=
       - ENVIRONMENT=local # local environment
       - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
       - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS

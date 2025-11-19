@@ -110,7 +110,7 @@ services:
     privileged: true  # Required for mounting NFS
 
   starlake-ui:
-    image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.5}-ui:${SL_IMAGE_VERSION:-0.1}
+    image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.5}-ui:${SL_IMAGE_VERSION:-1.5}
     pull_policy: always
     container_name: starlake-ui
     restart: on-failure
@@ -136,6 +136,7 @@ services:
       - SL_USE_LOCAL_FILE_SYSTEM=false
       - SL_API_GIT_COMMAND_ROOT=/git
       - SL_API_SECURE=false
+      - SL_API=true
       - SL_API_SESSION_AS_HEADER=true
       - SL_API_HTTP_FRONT_URL=${SL_API_HTTP_FRONT_URL:-http://starlake-ui}
       - SL_API_HTTP_INTERFACE=0.0.0.0
@@ -148,7 +149,6 @@ services:
       - SL_API_DOMAIN=${SL_API_DOMAIN:-localhost}
       - SL_API_PROJECT_ROOT=/mnt/filestore/projects
       - SL_API_ORCHESTRATOR_PRIVATE_URL=http://starlake-airflow:8080/airflow/
-      - SL_API_AIRFLOW_PRIVATE_URL=http://starlake-airflow:8080/airflow/
       - ENVIRONMENT=local # local environment
       - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
       - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS

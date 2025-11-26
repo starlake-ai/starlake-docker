@@ -1,1 +1,1 @@
-docker build -t trino-delta:latest .
+docker build -t trino-hive:latest .

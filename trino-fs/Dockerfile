@@ -12,9 +12,9 @@ RUN mkdir -p ${CATALOG_DIR}
 #COPY delta.properties /etc/trino/catalog/delta.properties
 COPY hive.properties /etc/trino/catalog/hive.properties
 COPY log.properties /etc/trino/log.properties
-
 COPY conf/core-site.xml /etc/trino/conf/core-site.xml
 COPY conf/metastore-site.xml /etc/trino/conf/metastore-site.xml
+
 
 # The official Trino image uses its entrypoint, so no need for CMD/ENTRYPOINT changes
 # The image is now ready to run!

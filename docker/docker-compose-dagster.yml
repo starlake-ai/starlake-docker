@@ -3,21 +3,6 @@ version: '3.8'
 
 services:
 
-  starlake-nas:
-    image: starlakeai/starlake-nas:latest
-    build:
-      context: .  # Assuming Dockerfile_nas is in the current directory
-      dockerfile: Dockerfile_nas
-    container_name: starlake-nas
-    restart: on-failure
-    privileged: true  # Required to access /proc/fs/nfsd
-    healthcheck:
-      test: ["CMD", "/healthcheck.sh"]
-      interval: "1s"
-    volumes:
-      - ${PROJECTS_DATA_PATH:-./projects}:/projects
-      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
-
   starlake-db:
     image: postgres:17
     restart: on-failure
@@ -50,8 +35,6 @@ services:
     depends_on:
       starlake-db:
         condition: service_healthy
-      starlake-nas:
-        condition: service_healthy
     environment:
       DAGSTER_PG_USERNAME: ${SL_POSTGRES_USER:-dbuser}
       DAGSTER_PG_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
@@ -62,21 +45,16 @@ services:
       /bin/bash -c "
       sleep 10 &&
       pip install --no-cache-dir starlake-dagster --upgrade --force-reinstall &&
-      mkdir -p /mnt/filestore/projects &&
-      mkdir -p /mnt/filestore/external_projects &&
-      mount -v -o nolock starlake-nas:/projects /mnt/filestore/projects &&
-      mount -v -o nolock starlake-nas:/projects/dags /opt/dagster/app/dags &&
-      mount -v -o nolock starlake-nas:/external_projects /mnt/filestore/external_projects &&
       python3 dagster_code_locations.py &&
       service cron --full-restart &
       exec dagster-webserver -h 0.0.0.0 -p 3000 --path-prefix /dagster"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket to run Docker commands from the container
-      - dagster_logs:/opt/dagster/app/logs
-      - dagster_storage:/opt/dagster/home/storage
+      - ${PROJECTS_DATA_PATH:-./projects}/dags:/opt/dagster/app/dags
+      - ${DAGSTER_LOGS:-./dagster/logs}:/opt/dagster/app/logs
+      - ${DAGSTER_STORAGE:-./dagster/storage}:/opt/dagster/home/storage
     ports:
       - ${SL_DAGSTER_PORT:-3000}:3000  # Dagster Webserver port
-    privileged: true  # Required for mounting NFS
 
   starlake-ui:
     image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.5}-ui:${SL_IMAGE_VERSION:-0.1}
@@ -86,15 +64,12 @@ services:
     depends_on:
       starlake-db:
         condition: service_healthy
-      starlake-nas:
-        condition: service_healthy
       starlake-dagster:
         condition: service_started
     healthcheck:
       test: [ "CMD", "curl", "-s", "-I", "http://starlake-ui:9000/api/v1/health" ]
       interval: "5s"
       retries: 60
-    privileged: true  # Required for mount permissions
     ports:
       - 9000  # starlake-ui default port
     environment:
@@ -115,13 +90,11 @@ services:
       - SL_API_JDBC_PASSWORD=${SL_POSTGRES_PASSWORD:-dbuser123}
       - SL_API_JDBC_URL=jdbc:postgresql://starlake-db:5432/${SL_POSTGRES_DB:-starlake}?user=${SL_POSTGRES_USER:-dbuser}&password=${SL_POSTGRES_PASSWORD:-dbuser123} # JDBC URL to connect to the database
       - SL_API_DOMAIN=${SL_API_DOMAIN:-localhost}
-      - SL_API_PROJECT_ROOT=/mnt/filestore/projects
+      - SL_API_PROJECT_ROOT=/projects
       - SL_API_ORCHESTRATOR_PRIVATE_URL=http://starlake-dagster:3000/dagster/
       - ENVIRONMENT=local # local environment
-      - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
-      - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS
-      - FILESTORE_MNT_DIR=/mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-ui container
-      - FILESTORE_EXTERNAL_PROJECTS_SHARE_NAME=external_projects
+      - FILESTORE_MNT_DIR=/projects  # Environment variable to specify the mount path inside starlake-ui container
+      - EXTERNAL_PROJECTS_MNT_DIR=/external_projects
       - POSTGRES_HOST=starlake-db
       - POSTGRES_DB=${SL_POSTGRES_DB:-starlake}
       - POSTGRES_USER=${SL_POSTGRES_USER:-dbuser}
@@ -145,6 +118,8 @@ services:
       /usr/bin/tini -- /app/run-api.sh"
     volumes:
       - ./scripts/starlake:/usr/local/bin/starlake:ro
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
+      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
 
   starlake-projects:
     image: starlakeai/starlake-projects:latest
@@ -158,17 +133,13 @@ services:
         condition: service_healthy
       starlake-ui:
         condition: service_healthy
-    privileged: true  # Required for mount permissions
     environment:
       POSTGRES_USER: ${SL_POSTGRES_USER:-dbuser}
       POSTGRES_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
       POSTGRES_DB: ${SL_POSTGRES_DB:-starlake}
       POSTGRES_HOST: starlake-db
-      FILESTORE_SHARE_NAME: projects  # Environment variable to specify the share name of the NAS
-      FILESTORE_IP_ADDRESS: starlake-nas  # Environment variable to specify the IP address of the NAS
-      FILESTORE_MNT_DIR: /mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
     volumes:
-      - ./projects:/projects
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
 
   starlake-proxy:
       image: starlakeai/starlake-proxy:${SL_IMAGE_VERSION:-0.1}
@@ -178,8 +149,6 @@ services:
       depends_on:
         starlake-db:
           condition: service_healthy
-        starlake-nas:
-          condition: service_healthy
         starlake-dagster:
           condition: service_started
         starlake-ui:
@@ -188,7 +157,6 @@ services:
         test: [ "CMD", "curl", "-s", "-I", "http://starlake-proxy:80/api/v1/health" ]
         interval: "5s"
         retries: 60
-      privileged: true  # Required for mount permissions
       ports:
         - ${SL_PORT:-80}:80  # starlake-proxy default port
       environment:
@@ -197,5 +165,3 @@ services:
 
 volumes:
   pgdata:
-  dagster_logs:
-  dagster_storage:

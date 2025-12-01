@@ -85,7 +85,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket to run Docker commands from the container
       - ${PROJECTS_DATA_PATH:-./projects}/dags:/opt/airflow/dags
-      - airflow_logs:/opt/airflow/logs
+      - ${AIRFLOW_LOGS:-./airflow/logs}:/opt/airflow/logs
 
   starlake-ui:
     image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.5}-ui:${SL_IMAGE_VERSION:-1.5}
@@ -232,4 +232,3 @@ services:
 
 volumes:
   pgdata:
-  airflow_logs:

@@ -51,6 +51,6 @@ RUN pip install --no-cache-dir \
 
 # Install SL Python libraries
 RUN pip install --no-cache-dir \
-    starlake-airflow~=0.3
+    starlake-airflow~=0.4
 
 

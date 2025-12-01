@@ -3,21 +3,6 @@ version: '3.8'
 
 services:
 
-  starlake-nas:
-    image: starlakeai/starlake-nas:latest
-    build:
-      context: .  # Assuming Dockerfile_nas is in the current directory
-      dockerfile: Dockerfile_nas
-    container_name: starlake-nas
-    restart: on-failure
-    privileged: true  # Required to access /proc/fs/nfsd
-    healthcheck:
-      test: ["CMD", "/healthcheck.sh"]
-      interval: "1s"
-    volumes:
-      - ${PROJECTS_DATA_PATH:-./projects}:/projects
-      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
-
   starlake-db:
     image: postgres:17
     restart: on-failure
@@ -48,13 +33,10 @@ services:
     depends_on:
       starlake-db:
         condition: service_healthy
-      starlake-nas:
-        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-s", "-I", "http://starlake-ui:9000/api/v1/health" ]
       interval: "5s"
       retries: 60
-    privileged: true  # Required for mount permissions
     ports:
       - 9000  # starlake-ui default port
     environment:
@@ -75,13 +57,11 @@ services:
       - SL_API_JDBC_PASSWORD=${SL_POSTGRES_PASSWORD:-dbuser123}
       - SL_API_JDBC_URL=jdbc:postgresql://starlake-db:5432/${SL_POSTGRES_DB:-starlake}?user=${SL_POSTGRES_USER:-dbuser}&password=${SL_POSTGRES_PASSWORD:-dbuser123} # JDBC URL to connect to the database
       - SL_API_DOMAIN=${SL_API_DOMAIN:-localhost}
-      - SL_API_PROJECTS_ROOT=/mnt/filestore/projects
+      - SL_API_PROJECT_ROOT=/projects
       - SL_API_ORCHESTRATOR_PRIVATE_URL=
       - ENVIRONMENT=local # local environment
-      - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
-      - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS
-      - FILESTORE_MNT_DIR=/mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-ui container
-      - FILESTORE_EXTERNAL_PROJECTS_SHARE_NAME=external_projects
+      - FILESTORE_MNT_DIR=/projects  # Environment variable to specify the mount path inside starlake-ui container
+      - EXTERNAL_PROJECTS_MNT_DIR=/external_projects
       - POSTGRES_HOST=starlake-db
       - POSTGRES_DB=${SL_POSTGRES_DB:-starlake}
       - POSTGRES_USER=${SL_POSTGRES_USER:-dbuser}
@@ -94,6 +74,7 @@ services:
       - SL_API_MAIL_FROM=${SL_API_MAIL_FROM:-contact@starlake.ai}
       - SL_API_MAX_USER_SPACE_MB=${SL_API_MAX_USER_SPACE_MB:-0}
       - SL_API_FILE_UPLOAD_MAX_CONTENT_LENGTH=${SL_API_FILE_UPLOAD_MAX_CONTENT_LENGTH:-1073741824} # 1 GB
+      - _JAVA_OPTIONS=-XX:UseSVE=0
       - SL_API_UI_FOLDER=/app/ui
       - LOAD_DAG_REF=snowflake_load_sql
       - TRANSFORM_DAG_REF=snowflake_transform_sql
@@ -102,6 +83,9 @@ services:
       sleep 10 &&
       python3 -m pip install --break-system-packages --no-cache-dir starlake-snowflake --upgrade &&
       /usr/bin/tini -- /app/run-api.sh"
+    volumes:
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
+      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
 
   starlake-projects:
     image: starlakeai/starlake-projects:latest
@@ -115,17 +99,13 @@ services:
         condition: service_healthy
       starlake-ui:
         condition: service_healthy
-    privileged: true  # Required for mount permissions
     environment:
       POSTGRES_USER: ${SL_POSTGRES_USER:-dbuser}
       POSTGRES_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
       POSTGRES_DB: ${SL_POSTGRES_DB:-starlake}
       POSTGRES_HOST: starlake-db
-      FILESTORE_SHARE_NAME: projects  # Environment variable to specify the share name of the NAS
-      FILESTORE_IP_ADDRESS: starlake-nas  # Environment variable to specify the IP address of the NAS
-      FILESTORE_MNT_DIR: /mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
     volumes:
-      - ./projects:/projects
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
 
   starlake-proxy:
       image: starlakeai/starlake-proxy:${SL_IMAGE_VERSION:-0.1}
@@ -135,15 +115,12 @@ services:
       depends_on:
         starlake-db:
           condition: service_healthy
-        starlake-nas:
-          condition: service_healthy
         starlake-ui:
           condition: service_healthy
       healthcheck:
         test: [ "CMD", "curl", "-s", "-I", "http://starlake-proxy:80/api/v1/health" ]
         interval: "5s"
         retries: 60
-      privileged: true  # Required for mount permissions
       ports:
         - ${SL_PORT:-80}:80  # starlake-proxy default port
       environment:

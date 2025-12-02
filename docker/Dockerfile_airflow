@@ -1,5 +1,5 @@
 # Use the official Apache Airflow image as the base
-FROM apache/airflow:2.10.5
+FROM apache/airflow:2.11.0
 
 # Switch to root user to install additional packages
 USER root
@@ -7,7 +7,7 @@ USER root
 # Install docker client and NFS client utilities
 RUN apt-get update \
     && apt-get install -y nfs-common \
-    docker.io \
+    docker-ce-cli \
     mandoc \
     less \
     && apt-get clean \
@@ -53,4 +53,5 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir \
     starlake-airflow~=0.4 docker --upgrade
 
+RUN docker --version
 

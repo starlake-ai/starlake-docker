@@ -6,8 +6,8 @@ services:
     image: postgres:17
     restart: on-failure
     container_name: starlake-db
-    ports:
-      - ${SL_DB_PORT:-5432}:5432
+    # ports:
+    #   - ${SL_DB_PORT:-5432}:5432
     environment:
       POSTGRES_USER: ${SL_POSTGRES_USER:-dbuser}
       POSTGRES_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
@@ -80,8 +80,8 @@ services:
       pip install --no-cache-dir starlake-airflow --upgrade --force-reinstall &&
       airflow webserver &
       exec airflow scheduler"
-    ports:
-      - 8080  # starlake-airflow default port
+    # ports:
+    #   - 8080  # starlake-airflow default port
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket to run Docker commands from the container
       - ${PROJECTS_DATA_PATH:-./projects}/dags:/opt/airflow/dags
@@ -101,8 +101,8 @@ services:
       test: [ "CMD", "curl", "-s", "-I", "http://starlake-ui:9000/api/v1/health" ]
       interval: "5s"
       retries: 60
-    ports:
-      - 9000  # starlake-ui default port
+    #ports:
+    #  - ${SL_UI_PORT:-9000}:9000  # starlake-ui default port
     environment:
       - SL_HOME=/app/starlake
       - SL_FS=file://
@@ -214,8 +214,8 @@ services:
         test: [ "CMD", "curl", "-s", "http://starlake-agent:8000/ask/health" ]
         interval: "5s"
         retries: 60
-      ports:
-        - ${SL_AI_PORT:-8000}:8000  # starlake-agent default port
+      # ports:
+      #   - ${SL_AI_PORT:-8000}:8000  # starlake-agent default port
       environment:
         - SL_ASK_APPLICATION_KEY=Starlake7157
         - SL_ASK_STARLAKE_JSON_FOLDER=/app/starlake_ask/resources

@@ -19,7 +19,7 @@ RUN pip3 install \
     dagster \
     dagster-webserver \
     dagster-postgres \
-    dagster-shell \
+    dagster-shell~=0.25 \
     dagster-docker \
     dagster-gcp
 
@@ -51,7 +51,7 @@ RUN ln -s /app/starlake/starlake /usr/local/bin/starlake
 
 # Install SL Python libraries
 RUN pip install --no-cache-dir \
-    starlake-dagster~=0.4 docker --upgrade
+    starlake-dagster~=0.4 docker croniter --upgrade
 
 RUN mkdir -p /opt/dagster/app/dags
 

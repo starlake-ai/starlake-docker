@@ -84,6 +84,7 @@ services:
     #   - 8080  # starlake-airflow default port
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket to run Docker commands from the container
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
       - ${PROJECTS_DATA_PATH:-./projects}/dags:/opt/airflow/dags
       - ${AIRFLOW_LOGS:-./airflow/logs}:/opt/airflow/logs
 

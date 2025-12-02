@@ -26,7 +26,7 @@ def load_module_with_defs(file_path) :
     try:
         spec.loader.exec_module(module)
     except Exception as e:
-        print(f"Error loading module {module}: {e}")
+        print(f"Error loading module {module}: {e.with_traceback()}")
         return None
 
     # Ensure `defs` exists in the module

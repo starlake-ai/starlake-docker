@@ -64,7 +64,7 @@ services:
       interval: "5s"
       retries: 60
     environment:
-      AIRFLOW__CORE__EXECUTOR: SequentialExecutor # SequentialExecutor is required to load files sequentially - to use LocalExecutor we have to fix the creation of audit tables concurrently while loading several tables in parallel for the first time
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor # SequentialExecutor is required to load files sequentially - to use LocalExecutor we have to fix the creation of audit tables concurrently while loading several tables in parallel for the first time
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${SL_POSTGRES_USER:-dbuser}:${SL_POSTGRES_PASSWORD:-dbuser123}@starlake-db:5432/${AIRFLOW_DB:-airflow}
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       INSTALL_MYSQL_CLIENT: 'false'
@@ -77,13 +77,14 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      pip install --no-cache-dir starlake-airflow --upgrade --force-reinstall &&
+      pip install --no-cache-dir starlake-airflow docker --upgrade --force-reinstall &&
       airflow webserver &
       exec airflow scheduler"
     ports:
       - 8080  # starlake-airflow default port
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket to run Docker commands from the container
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
       - ${PROJECTS_DATA_PATH:-./projects}/dags:/opt/airflow/dags
       - ${AIRFLOW_LOGS:-./airflow/logs}:/opt/airflow/logs
 
@@ -144,14 +145,13 @@ services:
       - SL_API_UI_FOLDER=/app/ui
       - SL_API_DOCS_USERS=starlake
       - SL_API_DOCS_USER=starlake
-      - SL_API_DOCS_PASSWORD=s3cret.Paw	
-
+      - SL_API_DOCS_PASSWORD=s3cret.Paw
       - LOAD_DAG_REF=airflow_load_shell
       - TRANSFORM_DAG_REF=airflow_transform_shell
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow --upgrade &&
+      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow docker --upgrade &&
       airflow db init &&
       airflow db migrate &&
       /usr/bin/tini -- /app/run-api.sh"

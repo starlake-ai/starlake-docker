@@ -18,3 +18,10 @@ COPY conf/metastore-site.xml /etc/trino/conf/metastore-site.xml
 
 # The official Trino image uses its entrypoint, so no need for CMD/ENTRYPOINT changes
 # The image is now ready to run!
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+USER root
+RUN chmod +x /usr/local/bin/entrypoint.sh
+USER trino
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

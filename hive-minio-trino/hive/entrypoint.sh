@@ -16,8 +16,10 @@ while ! nc -z ${POSTGRES_HOST} ${POSTGRES_PORT:-5432}; do
 done
 echo "PostgreSQL is ready!"
 # Check if the schema has been initialized
-SCHEMA_CHECK_FILE="/Users/hayssams/git/public/hive3-metastore/hive/warehouse/.schema_initialized"
-if [ ! -f "$SCHEMA_CHECK_FILE" ]; then
+# Check if the schema has been initialized using schematool
+if $HIVE_HOME/bin/schematool -dbType postgres -info; then
+    echo "Hive Metastore schema already initialized. Skipping initialization."
+else
     echo "Initializing Hive Metastore schema..."
     $HIVE_HOME/bin/schematool -dbType postgres -initSchema
     if [ $? -ne 0 ]; then
@@ -25,9 +27,6 @@ if [ ! -f "$SCHEMA_CHECK_FILE" ]; then
         exit 1
     fi
     echo "Schema initialization successful."
-    touch "$SCHEMA_CHECK_FILE"
-else
-    echo "Schema already initialized. Skipping schematool -initSchema."
 fi
 echo "Starting Hive Metastore service..."
 # Start the Metastore service

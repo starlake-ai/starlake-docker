@@ -1,20 +1,6 @@
 name: starlake
 
 services:
-  starlake-nas:
-    image: starlakeai/starlake-nas:latest
-    build:
-      context: .  # Assuming Dockerfile_nas is in the current directory
-      dockerfile: Dockerfile_nas
-    container_name: starlake-nas
-    restart: on-failure
-    privileged: true  # Required to access /proc/fs/nfsd
-    healthcheck:
-      test: ["CMD", "/healthcheck.sh"]
-      interval: "1s"
-    volumes:
-      - ${PROJECTS_DATA_PATH:-./projects}:/projects
-      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
 
   starlake-db:
     image: postgres:17
@@ -71,8 +57,6 @@ services:
     depends_on:
       starlake-db:
         condition: service_healthy
-      starlake-nas:
-        condition: service_healthy
       starlake-init-airflow-db:
         condition: service_completed_successfully
     healthcheck:
@@ -80,7 +64,7 @@ services:
       interval: "5s"
       retries: 60
     environment:
-      AIRFLOW__CORE__EXECUTOR: SequentialExecutor # SequentialExecutor is required to load files sequentially - to use LocalExecutor we have to fix the creation of audit tables concurrently while loading several tables in parallel for the first time
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor # SequentialExecutor is required to load files sequentially - to use LocalExecutor we have to fix the creation of audit tables concurrently while loading several tables in parallel for the first time
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${SL_POSTGRES_USER:-dbuser}:${SL_POSTGRES_PASSWORD:-dbuser123}@starlake-db:5432/${AIRFLOW_DB:-airflow}
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       INSTALL_MYSQL_CLIENT: 'false'
@@ -93,20 +77,16 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      pip install --no-cache-dir starlake-airflow --upgrade --force-reinstall &&
-      sudo mkdir -p /mnt/filestore/projects &&
-      sudo mkdir -p /mnt/filestore/external_projects &&
-      sudo mount -v -o nolock starlake-nas:/projects /mnt/filestore/projects &&
-      sudo mount -v -o nolock starlake-nas:/projects/dags /opt/airflow/dags &&
-      sudo mount -v -o nolock starlake-nas:/external_projects /mnt/filestore/external_projects &&
+      pip install --no-cache-dir starlake-airflow docker --upgrade --force-reinstall &&
       airflow webserver &
       exec airflow scheduler"
     ports:
       - 8080  # starlake-airflow default port
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket to run Docker commands from the container
-    #  - airflow_logs:/opt/airflow/logs
-    privileged: true  # Required for mounting NFS
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
+      - ${PROJECTS_DATA_PATH:-./projects}/dags:/opt/airflow/dags
+      - ${AIRFLOW_LOGS:-./airflow/logs}:/opt/airflow/logs
 
   starlake-ui:
     image: starlakeai/starlake-${SL_MAJOR_VERSION:-1.5}-ui:${SL_IMAGE_VERSION:-1.5}
@@ -116,15 +96,12 @@ services:
     depends_on:
       starlake-db:
         condition: service_healthy
-      starlake-nas:
-        condition: service_healthy
       starlake-airflow:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-s", "-I", "http://starlake-ui:9000/api/v1/health" ]
       interval: "5s"
       retries: 60
-    privileged: true  # Required for mount permissions
     ports:
       - 9000  # starlake-ui default port
     environment:
@@ -146,15 +123,13 @@ services:
       - SL_API_JDBC_PASSWORD=${SL_POSTGRES_PASSWORD:-dbuser123}
       - SL_API_JDBC_URL=jdbc:postgresql://starlake-db:5432/${SL_POSTGRES_DB:-starlake}?user=${SL_POSTGRES_USER:-dbuser}&password=${SL_POSTGRES_PASSWORD:-dbuser123} # JDBC URL to connect to the database
       - SL_API_DOMAIN=${SL_API_DOMAIN:-localhost}
-      - SL_API_PROJECT_ROOT=/mnt/filestore/projects
+      - SL_API_PROJECT_ROOT=/projects
       - SL_API_ORCHESTRATOR_PRIVATE_URL=http://starlake-airflow:8080/airflow/
       - SL_API_AI_URL=http://starlake-agent:8000
       - SL_AI_APPLICATION_KEY=Starlake7157
       - ENVIRONMENT=local # local environment
-      - FILESTORE_SHARE_NAME=projects  # Environment variable to specify the share name of the NAS
-      - FILESTORE_IP_ADDRESS=starlake-nas  # Environment variable to specify the IP address of the NAS
-      - FILESTORE_MNT_DIR=/mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-ui container
-      - FILESTORE_EXTERNAL_PROJECTS_SHARE_NAME=external_projects
+      - FILESTORE_MNT_DIR=/projects  # Environment variable to specify the mount path inside starlake-ui container
+      - EXTERNAL_PROJECTS_MNT_DIR=/external_projects
       - POSTGRES_HOST=starlake-db
       - POSTGRES_DB=${SL_POSTGRES_DB:-starlake}
       - POSTGRES_USER=${SL_POSTGRES_USER:-dbuser}
@@ -170,19 +145,20 @@ services:
       - SL_API_UI_FOLDER=/app/ui
       - SL_API_DOCS_USERS=starlake
       - SL_API_DOCS_USER=starlake
-      - SL_API_DOCS_PASSWORD=s3cret.Paw	
-
+      - SL_API_DOCS_PASSWORD=s3cret.Paw
       - LOAD_DAG_REF=airflow_load_shell
       - TRANSFORM_DAG_REF=airflow_transform_shell
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
-      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow --upgrade &&
+      python3 -m pip install --break-system-packages --no-cache-dir starlake-airflow docker --upgrade &&
       airflow db init &&
       airflow db migrate &&
       /usr/bin/tini -- /app/run-api.sh"
     volumes:
       - ./scripts/starlake:/usr/local/bin/starlake:ro
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
+      - ${EXTERNAL_PROJECTS_DATA_PATH:-./external_projects}:/external_projects
 
   starlake-projects:
     image: starlakeai/starlake-projects:latest
@@ -196,17 +172,13 @@ services:
         condition: service_healthy
       starlake-ui:
         condition: service_healthy
-    privileged: true  # Required for mount permissions
     environment:
       POSTGRES_USER: ${SL_POSTGRES_USER:-dbuser}
       POSTGRES_PASSWORD: ${SL_POSTGRES_PASSWORD:-dbuser123}
       POSTGRES_DB: ${SL_POSTGRES_DB:-starlake}
       POSTGRES_HOST: starlake-db
-      FILESTORE_SHARE_NAME: projects  # Environment variable to specify the share name of the NAS
-      FILESTORE_IP_ADDRESS: starlake-nas  # Environment variable to specify the IP address of the NAS
-      FILESTORE_MNT_DIR: /mnt/filestore/projects  # Environment variable to specify the mount path inside starlake-api container
     volumes:
-      - ./projects:/projects
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
 
   starlake-proxy:
       image: starlakeai/starlake-proxy:${SL_IMAGE_VERSION:-0.1}
@@ -216,8 +188,6 @@ services:
       depends_on:
         starlake-db:
           condition: service_healthy
-        starlake-nas:
-          condition: service_healthy
         starlake-airflow:
           condition: service_healthy
         starlake-ui:
@@ -226,7 +196,6 @@ services:
         test: [ "CMD", "curl", "-s", "-I", "http://starlake-proxy:80/api/v1/health" ]
         interval: "5s"
         retries: 60
-      privileged: true  # Required for mount permissions
       ports:
         - ${SL_PORT:-80}:80  # starlake-proxy default port
       environment:
@@ -240,12 +209,6 @@ services:
       restart: on-failure
       depends_on:
         starlake-db:
-          condition: service_healthy
-        starlake-nas:
-          condition: service_healthy
-        starlake-airflow:
-          condition: service_healthy
-        starlake-ui:
           condition: service_healthy
       healthcheck:
         test: [ "CMD", "curl", "-s", "http://starlake-agent:8000/ask/health" ]
@@ -265,15 +228,7 @@ services:
         - SL_ASK_HOST=0.0.0.0
         - SL_ASK_DB_TYPE=postgres
         - SL_ASK_API_DOCS_USER=starlake
-        - SL_ASK_API_DOCS_PASSWORD=s3cret.Paw	
-
+        - SL_ASK_API_DOCS_PASSWORD=s3cret.Paw
 
 volumes:
   pgdata:
-  airflow_logs:
-  # starlake-prj-nfs-mount:
-  #   driver: local
-  #   driver_opts:
-  #     type: nfs
-  #     o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-  #     device: ":/path/to/starlake/project/container"

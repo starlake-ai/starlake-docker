@@ -68,11 +68,11 @@ services:
       starlake-dagster:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "curl", "-s", "-I", "http://starlake-ui:9000/api/v1/health" ]
+      test: [ "CMD", "curl", "-s", "-I", "http://starlake-ui:9900/api/v1/health" ]
       interval: "5s"
       retries: 60
     ports:
-      - 9000  # starlake-ui default port
+      - 9900  # starlake-ui default port
     environment:
       - SL_HOME=/app/starlake
       - SL_FS=file://
@@ -84,7 +84,7 @@ services:
       - SL_API_SESSION_AS_HEADER=true
       - SL_API_HTTP_FRONT_URL=${SL_API_HTTP_FRONT_URL:-http://starlake-ui}
       - SL_API_HTTP_INTERFACE=0.0.0.0
-      - SL_API_HTTP_PORT=9000
+      - SL_API_HTTP_PORT=9900
       - SL_LOG_LEVEL=${SL_LOG_LEVEL:-info}
       - SL_API_JDBC_DRIVER=org.postgresql.Driver
       - SL_API_JDBC_USER=${SL_POSTGRES_USER:-dbuser}

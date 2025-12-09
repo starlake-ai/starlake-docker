@@ -15,17 +15,17 @@
 
     <property>
         <name>fs.s3a.endpoint</name>
-        <value>http://host.docker.internal:9000</value>
+        <value>${S3_ENDPOINT}</value>
     </property>
 
     <property>
         <name>fs.s3a.access.key</name>
-        <value>minio</value>
+        <value>${MINIO_ACCESS_KEY}</value>
     </property>
 
     <property>
         <name>fs.s3a.secret.key</name>
-        <value>minio123</value>
+        <value>${MINIO_SECRET_KEY}</value>
     </property>
 
     <property>

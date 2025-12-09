@@ -1,0 +1,4 @@
+docker/projects
+hive-minio-trino/minio/data
+hive-minio-trino/warehouse
+docker/airflow/logs

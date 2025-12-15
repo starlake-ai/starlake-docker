@@ -231,7 +231,7 @@ services:
         - SL_ASK_API_DOCS_PASSWORD=s3cret.Paw
 
   starlake-gizmo:
-    image: starlakeai/gizmo-on-demand:latest
+    image: starlakeai/gizmo-on-demand:${SL_GIZMO_IMAGE_VERSION:-latest}
     pull_policy: always
     container_name: starlake-gizmo
     restart: on-failure

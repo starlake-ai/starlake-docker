@@ -236,7 +236,7 @@ services:
     container_name: starlake-gizmo
     restart: on-failure
     depends_on:
-      starlake-ui:
+      starlake-proxy:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-s", "http://starlake-gizmo:10900/health"]

@@ -230,5 +230,38 @@ services:
         - SL_ASK_API_DOCS_USER=starlake
         - SL_ASK_API_DOCS_PASSWORD=s3cret.Paw
 
+  starlake-gizmo:
+    image: starlakeai/gizmo-on-demand:${SL_GIZMO_IMAGE_VERSION:-latest}
+    pull_policy: always
+    container_name: starlake-gizmo
+    restart: on-failure
+    depends_on:
+      starlake-proxy:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://starlake-gizmo:10900/health"]
+      interval: "5s"
+      retries: 60
+    ports:
+      - ${SL_GIZMO_PORT:-10900}:10900
+      - ${SL_GIZMO_MIN_PORT:-11900}-${SL_GIZMO_MAX_PORT:-12000}:${SL_GIZMO_MIN_PORT:-11900}-${SL_GIZMO_MAX_PORT:-12000}
+    environment:
+      - SL_GIZMO_ON_DEMAND_HOST=0.0.0.0
+      - SL_GIZMO_ON_DEMAND_PORT=10900
+      - SL_GIZMO_MIN_PORT=${SL_GIZMO_MIN_PORT:-11900}
+      - SL_GIZMO_MAX_PORT=${SL_GIZMO_MAX_PORT:-12000}
+      - SL_GIZMO_MAX_PROCESSES=${SL_GIZMO_MAX_PROCESSES:-10}
+      - SL_GIZMO_API_KEY=${SL_GIZMO_API_KEY:-a_secret_api_key}
+      - PG_HOST=starlake-db
+      - PG_PORT=5432
+      - PG_USERNAME=${SL_POSTGRES_USER:-dbuser}
+      - PG_PASSWORD=${SL_POSTGRES_PASSWORD:-dbuser123}
+      - GIZMOSQL_USERNAME=${GIZMOSQL_USERNAME:-gizmosql_user}
+      - GIZMOSQL_PASSWORD=${GIZMOSQL_PASSWORD:-gizmosql_password}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-a_very_secret_key}
+      - TLS_ENABLED=0
+    volumes:
+      - ${PROJECTS_DATA_PATH:-./projects}:/projects
+
 volumes:
   pgdata:

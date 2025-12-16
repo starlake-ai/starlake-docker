@@ -148,6 +148,7 @@ services:
       - SL_API_DOCS_PASSWORD=s3cret.Paw
       - LOAD_DAG_REF=airflow_load_shell
       - TRANSFORM_DAG_REF=airflow_transform_shell
+      - SL_GIZMO_API_KEY=${SL_GIZMO_API_KEY:-a_secret_api_key}
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&

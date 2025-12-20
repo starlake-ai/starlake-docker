@@ -227,6 +227,7 @@ services:
       SL_API_ORCHESTRATOR_PRIVATE_URL: http://starlake-airflow:8080/airflow/
       LOAD_DAG_REF: airflow_load_shell
       TRANSFORM_DAG_REF: airflow_transform_shell
+      SL_API_AIRFLOW_VERSION: 2
     entrypoint: >
       /bin/bash -c "
       sleep 10 &&
@@ -308,6 +309,7 @@ services:
       <<: *starlake-ui-common-env
       SL_API_ORCHESTRATOR_PRIVATE_URL: http://starlake-airflow:8080/airflow/
       LOAD_DAG_REF: airflow_load_shell
+      SL_API_AIRFLOW_VERSION: 3
       TRANSFORM_DAG_REF: airflow_transform_shell
     entrypoint: >
       /bin/bash -c "
